@@ -5,6 +5,7 @@ var dogImg;
 var happyDog;
 var foodS;
 var foodStock;
+var state = "happy";
 
 function preload()
 {
@@ -34,7 +35,9 @@ function draw() {
 
   if(keyWentDown(UP_ARROW)){
     writeStock(foodS);
-    dog.addImage(happyDog);
+    if(state === "happy"){
+      dog.addImage(happyDog);
+    }
   }
 
   drawSprites();
@@ -67,5 +70,7 @@ function textDisplay(){
     textSize(25);
     textAlign(CENTER);
     text("The food supply has run out!", 250, 40);
+    state = "unhappy";
+    dog.addImage(dogImg);
   }
 }
