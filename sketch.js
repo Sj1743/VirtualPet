@@ -85,6 +85,7 @@ function feedDog(){
     foodS--;
     foodObj.updateFoodStock(foodS);
     lastFed = hour();
+    foodObj.updateLastFed(lastFed);
   }
 }
 
