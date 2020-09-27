@@ -3,21 +3,31 @@ var database;
 var dog, dogImg, happyDog;
 var foodS = 20;
 var lastFed = 0;
+var currentTime = 0;
 var foodObj = null;
 var feedButton, addButton;
+var bedroomImg, gardenImg, washroomImg;
+var gameState;
+var fed = 0;
 
 //load images
 function preload()
 {
   dogImg = loadImage("images/dogImg.png");
   happyDog = loadImage("images/dogImg1.png");
+  washroomImg = loadImage("images/WashRoom.png");
+  bedroomImg = loadImage("images/BedRoom.png");
+  gardenImg = loadImage("images/Garden.png");
 }
 
 
 function setup() {
 
   //canvas
-  createCanvas(800, 500);
+  createCanvas(600, 800);
+
+  //database
+  database = firebase.database();
 
   //button to feed the dog
   feedButton = createButton("Feed the dog");
@@ -33,11 +43,13 @@ function setup() {
   foodObj = new Food();
 
   //create dog
-  dog = createSprite(650, 280);
+  dog = createSprite(490, 280);
   dog.scale = 0.3;
   dog.addImage("dog1", dogImg);
   dog.addImage("dog2", happyDog);
 
+  //gameState
+  gameState = "HUNGRY";
 }
 
 
@@ -45,6 +57,30 @@ function draw() {
 
   //background
   background(46, 139, 87);
+
+  getCurrentTime();
+
+  if(gameState === "SATIATED"){
+    feedButton.hide();
+    addButton.hide();
+    dog.addImage("dog2", happyDog);
+    dog.x = 300; 
+    dog.y = 300;
+  }else if(currentTime === lastFed + 1){
+    garden();
+    gameState = "PLAYING";
+    updateGameState(gameState);
+  }else if((currentTime >= lastFed + 2) &&(currentTime <= lastFed + 4)){
+    washroom();
+    gameState = "BATHING";
+    updateGameState(gameState);
+  }else if(gameState === "HUNGRY"){
+    foodObj.display();
+    feedButton.show();
+    addButton.show();
+    dog.addImage("dog1", dogImg);
+
+  }
 
   //display last fed
   fill("white");
@@ -63,10 +99,7 @@ function draw() {
   //display food stock
   fill(245, 245, 220);
   textSize(20);
-  text("Food Stock : " + foodS, 30, 470);
-
-  //display foodObj
-  foodObj.display();
+  text("Food Stock : " + foodS, 30, 40);
 
 }
 
@@ -80,15 +113,53 @@ function addFood(){
 
 //change dog image, deduct foodS, updateFoodStock using foodS, set lastFed
 function feedDog(){
-  if(foodS > 0){
+  if((foodS > 0) && (gameState === "HUNGRY")){
     dog.changeAnimation("dog2", happyDog);
     foodS--;
     foodObj.updateFoodStock(foodS);
     lastFed = hour();
     foodObj.updateLastFed(lastFed);
+    satiate();
   }
 }
 
+function satiate(){
+  if((lastFed === currentTime)){
+    fed++;
+    if(fed >= 10){
+      gameState = "SATIATED";
+      updateGameState(gameState);
+    }
+  }
+}
+
+
+function bedroom(){
+  background(bedroomImg, 550, 500);
+  dog.remove();
+}
+
+function washroom(){
+  background(washroomImg, 550, 500);
+  dog.remove();
+}
+
+function garden(){
+  background(gardenImg, 550, 500);
+  dog.remove();
+}
+
+
+//update gamestate in database
+function updateGameState(state){
+  database.ref("/").update({GameState: state});
+}
+
+
+//get present time from system
+function getCurrentTime(){
+  currentTime = hour();
+}
 
 /*
 
