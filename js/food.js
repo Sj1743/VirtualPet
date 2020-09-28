@@ -2,9 +2,10 @@ class Food {
     constructor(){
 
         this.foodStock = 20;
-        this.lastFed = 0;
+        this.lastFed = 12;
         this.image = loadImage("images/Milk.png");
 
+        //database
         database = firebase.database();
     }
 
@@ -14,8 +15,16 @@ class Food {
         database.ref("/").update({Food: food});
     }
 
+    //updating value of lastfed in database and lastfed with time parameter
+    updateLastFed(time){
+        this.lastFed = time;
+        database.ref("/").update({LastFed: time});
+    }
+
+
     display(){
 
+    //display food in rows of 10
      var x = 80, y = 100;
      imageMode(CENTER);
      if(this.foodStock != 0){
